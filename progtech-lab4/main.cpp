@@ -2,11 +2,6 @@
 #include <iostream>
 #include <fstream>
 
-
-// Ввод дерева реализован в следующем формате:
-// Вводится пара значений. Первое - значение данной ноды. Второе - количество детей этой ноды.
-// После чего происходит ввод всех детей ноды
-
 struct Node {
 	int value;
 	std::vector<Node*> children;
@@ -28,12 +23,9 @@ private:
 		int nodeValue;
 		int childCount;
 
-		stream >> nodeValue;
-		stream >> childCount;
-		if (childCount < 0) {
+		if (!(stream >> nodeValue) || !(stream >> childCount) || childCount < 0) {
 			throw std::runtime_error("Invalid input!!!");
 		}
-
 
 		Node* newNode = createNode(nodeValue, childCount);
 
@@ -89,13 +81,34 @@ private:
 		}
 	}
 
+	void destroyTree(Node* node) {
+		if (node == nullptr) {
+			return;
+		}
+
+		for (Node* child : node->children) {
+			destroyTree(child);
+		}
+
+		delete node;
+	}
+
 public:
 	NTree(){
 		root = nullptr;
 	}
+	~NTree() {
+		destroyTree(root);
+	}
 
 	void readTree(std::istream& stream) {
-		root = readTreeInner(stream);
+		if (root == nullptr) {
+			root = readTreeInner(stream);
+		}
+		else {
+			destroyTree(root);
+			root = readTreeInner(stream);
+		}
 	}
 
 	Node* getRoot() const {
@@ -156,7 +169,7 @@ int main() {
 					throw std::runtime_error("File error!!!");
 				}
 				templateTree.readTree(templateFile);
-				file.close();
+				templateFile.close();
 
 				break;
 			}
