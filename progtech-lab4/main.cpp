@@ -96,6 +96,7 @@ int main() {
 			std::cout << "Where do I get the tree? \n1 - console\n2 - file\n0 - exit\n\nEnter: ";
 			int switchValue;
 			NTree tree;
+			NTree templateTree;
 			if (!(std::cin >> switchValue)) {
 				throw std::runtime_error("Invalid menu option");
 			}
@@ -105,12 +106,21 @@ int main() {
 
 			}
 			case 2: {
-				std::cout << "Enter the filename: ";
+				std::cout << "Enter the main tree filename: ";
 				std::string filename;
 				std::cin >> filename;
 
 				std::ifstream file(filename);
 				tree.readTree(file);
+				file.close();
+				
+				std::cout << "Enter the template tree filename: ";
+				std::string templateFilename;
+				std::cin >> templateFilename;
+
+				std::ifstream file(templateFilename);
+				templateTree.readTree(file);
+				file.close();
 				break;
 			}
 			case 0: {
