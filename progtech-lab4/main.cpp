@@ -16,8 +16,6 @@ struct Node {
 class NTree {
 private:
 	Node* root;
-	std::vector<int> levels;
-	int maxLevel;
 
 	Node* createNode(int value, int childCount) {
 		Node* newNode = new Node();
@@ -46,22 +44,7 @@ private:
 		return newNode;
 	}
 
-	void calcLevelContentInner(Node* localRoot, int curLevel) {
-		if (localRoot == nullptr) {
-			return;
-		}
-
-		if (levels.size() <= curLevel) {
-			levels.resize(levels.size() + 1);
-			maxLevel = levels.size();
-		}
-		levels[curLevel] += 1;
-		for (int i = 0; i < localRoot->children.size(); i++) {
-			calcLevelContentInner(localRoot->children[i], curLevel + 1);
-		}
-	}
-
-	void printTreeInner(const Node* node, int depth) {
+	static void printTreeInner(const Node* node, int depth) {
 		if (node == nullptr) {
 			return;
 		}
@@ -73,6 +56,39 @@ private:
 		}
 	}
 
+	bool isSameStructure(Node* localRoot, Node* refRoot) {
+		if (localRoot == nullptr || refRoot == nullptr) {
+			return localRoot == refRoot;
+		}
+
+		if (localRoot->children.size() != refRoot->children.size()) {
+			return false;
+		}
+
+		for (int i = 0; i < localRoot->children.size(); i++) {
+			if (!isSameStructure(localRoot->children[i], refRoot->children[i])) {
+				return false;
+			}
+		}
+	
+		return true;
+	}
+
+	void findSubtreesInner(Node* localRoot, Node* refRoot, std::vector<Node*>& finded) {
+		if (localRoot == nullptr) {
+			return;
+		}
+
+		if (isSameStructure(localRoot, refRoot)) {
+			finded.push_back(localRoot);
+			return;
+		}
+
+		for (int i = 0; i < localRoot->children.size(); i++) {
+			findSubtreesInner(localRoot->children[i], refRoot, finded);
+		}
+	}
+
 public:
 	NTree(){
 		root = nullptr;
@@ -80,14 +96,23 @@ public:
 
 	void readTree(std::istream& stream) {
 		root = readTreeInner(stream);
-		calcLevelContentInner(root, 0);
 	}
 
-	void printTree() {
-		printTreeInner(root, 0);
+	Node* getRoot() const {
+		return root;
+	}
+
+	static void printTree(const Node* localRoot) {
+		printTreeInner(localRoot, 0);
+	}
+
+	std::vector<Node*> findSubtrees(const NTree& reference) {
+		std::vector<Node*> finded;
+		Node* refRoot = reference.getRoot();
+		findSubtreesInner(root, refRoot, finded);
+		return finded;
 	}
 };
-
 
 
 int main() {
@@ -103,7 +128,12 @@ int main() {
 			switch (switchValue) {
 			case 1:
 			{
+				std::cout << "Enter the main tree: ";
+				tree.readTree(std::cin);
+				std::cout << "Enter the template tree: ";
+				templateTree.readTree(std::cin);
 
+				break;
 			}
 			case 2: {
 				std::cout << "Enter the main tree filename: ";
@@ -111,6 +141,9 @@ int main() {
 				std::cin >> filename;
 
 				std::ifstream file(filename);
+				if (!file) {
+					throw std::runtime_error("File error!!!");
+				}
 				tree.readTree(file);
 				file.close();
 				
@@ -118,9 +151,13 @@ int main() {
 				std::string templateFilename;
 				std::cin >> templateFilename;
 
-				std::ifstream file(templateFilename);
-				templateTree.readTree(file);
+				std::ifstream templateFile(templateFilename);
+				if (!templateFile) {
+					throw std::runtime_error("File error!!!");
+				}
+				templateTree.readTree(templateFile);
 				file.close();
+
 				break;
 			}
 			case 0: {
@@ -130,8 +167,17 @@ int main() {
 				throw std::runtime_error("Unknown menu option");
 			}
 			}
+			std::cout << "MAIN TREE: \n";
+			NTree::printTree(tree.getRoot());
+			std::cout << "TEMPLATE TREE STRUCTURE: \n";
+			NTree::printTree(templateTree.getRoot());
 
-			tree.printTree();
+			std::vector<Node*> findedSubtrees = tree.findSubtrees(templateTree);
+			std::cout << "FINDED SUBTREES: ";
+			for (int i = 0; i < findedSubtrees.size(); i ++) {
+				std::cout << "\n" << i << ": \n";
+				NTree::printTree(findedSubtrees[i]);
+			}
 
 			std::cout << std::endl;
 			std::cout << "\nPress Enter to continue...\n";

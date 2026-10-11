@@ -23,5 +23,8 @@
     <Text Include="ntree.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
+    <Text Include="template.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
   </ItemGroup>
 </Project>
