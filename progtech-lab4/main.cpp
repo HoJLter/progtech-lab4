@@ -12,6 +12,7 @@ class NTree {
 private:
 	Node* root;
 
+	// Создает новый узел и выделяет место под его детей.
 	Node* createNode(int value, int childCount) {
 		Node* newNode = new Node();
 		newNode->value = value;
@@ -19,6 +20,7 @@ private:
 		return newNode;
 	}
 
+	// Считывает узел и всех его детей из потока.
 	Node* readTreeInner(std::istream& stream) {
 		int nodeValue;
 		int childCount;
@@ -36,6 +38,7 @@ private:
 		return newNode;
 	}
 
+	// Выводит узел и его поддерево с отступом по глубине.
 	static void printTreeInner(const Node* node, int depth) {
 		if (node == nullptr) {
 			return;
@@ -48,6 +51,7 @@ private:
 		}
 	}
 
+	// Проверяет, совпадает ли структура двух поддеревьев.
 	bool isSameStructure(Node* localRoot, Node* refRoot) {
 		if (localRoot == nullptr || refRoot == nullptr) {
 			return localRoot == refRoot;
@@ -66,6 +70,7 @@ private:
 		return true;
 	}
 
+	// Ищет в дереве поддеревья с такой же структурой.
 	void findSubtreesInner(Node* localRoot, Node* refRoot, std::vector<Node*>& finded) {
 		if (localRoot == nullptr) {
 			return;
@@ -81,6 +86,7 @@ private:
 		}
 	}
 
+	// Удаляет узел и все его дочерние узлы.
 	void destroyTree(Node* node) {
 		if (node == nullptr) {
 			return;
@@ -94,13 +100,18 @@ private:
 	}
 
 public:
+
+	// Создает пустое дерево.
 	NTree(){
 		root = nullptr;
 	}
+
+	// Удаляет все узлы дерева.
 	~NTree() {
 		destroyTree(root);
 	}
 
+	// Считывает дерево из потока.
 	void readTree(std::istream& stream) {
 		if (root == nullptr) {
 			root = readTreeInner(stream);
@@ -111,14 +122,17 @@ public:
 		}
 	}
 
+	// Возвращает корневой узел дерева.
 	Node* getRoot() const {
 		return root;
 	}
 
+	// Выводит дерево начиная с переданного узла.
 	static void printTree(const Node* localRoot) {
 		printTreeInner(localRoot, 0);
 	}
 
+	// Возвращает список корней поддеревьев, совпадающих с шаблоном.
 	std::vector<Node*> findSubtrees(const NTree& reference) {
 		std::vector<Node*> finded;
 		Node* refRoot = reference.getRoot();
